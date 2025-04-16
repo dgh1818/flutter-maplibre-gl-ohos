@@ -1,0 +1,10 @@
+{
+  "module": {
+    "name": "maplibre_gl",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet"
+    ]
+  }
+}

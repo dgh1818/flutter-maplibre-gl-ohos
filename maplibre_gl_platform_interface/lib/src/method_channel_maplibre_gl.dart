@@ -177,6 +177,14 @@ class MapLibreMethodChannel extends MapLibrePlatform {
         creationParams: creationParams,
         creationParamsCodec: const StandardMessageCodec(),
       );
+    } else {
+      return OhosView(
+      // 封装原生组件
+        viewType: 'plugins.flutter.io/maplibre_gl', // 这里要与Native侧CustomPlugin中的保持一致
+        onPlatformViewCreated: onPlatformViewCreated,
+        creationParams: creationParams,
+        creationParamsCodec: const StandardMessageCodec(),
+      );
     }
     return Text(
         '$defaultTargetPlatform is not yet supported by the maps plugin');
@@ -206,6 +214,15 @@ class MapLibreMethodChannel extends MapLibrePlatform {
   Future<bool?> moveCamera(CameraUpdate cameraUpdate) async {
     return _channel.invokeMethod('camera#move', <String, dynamic>{
       'cameraUpdate': cameraUpdate.toJson(),
+    });
+  }
+
+  @override
+  Future<void> addMarkerAtLatLng_Ohos(LatLng centre, String path) async {
+    await _channel.invokeMethod('map#addMarkerAtLatLng', <String, dynamic>{
+      'longitude': centre.longitude,
+      'latitude': centre.latitude,
+      'path' : path
     });
   }
 
