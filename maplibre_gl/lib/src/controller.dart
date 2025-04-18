@@ -663,10 +663,10 @@ class MapLibreMapController extends ChangeNotifier {
         .updateMyLocationTrackingMode(myLocationTrackingMode);
   }
 
-  Future<void> addMarkerAtLatLng_Ohos(LatLng centre, String path) async {
+  Future<void> addMarkerAtLatLng_Ohos(LatLng centre, String path, double size) async {
     //no marker is displayed if asset-path is incorrect
     
-    return _maplibrePlatform.addMarkerAtLatLng_Ohos(centre, path);
+    return _maplibrePlatform.addMarkerAtLatLng_Ohos(centre, path, size);
   }
 
   /// Updates the language of the map labels to match the device's language.

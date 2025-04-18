@@ -21,8 +21,6 @@ export class Convert {
     options_converted.forEach((value:ESObject,key:string) => {
       console.error("list" + key);
     })
-    // let value:ESObject;
-    // let key:String;
     options_converted.forEach((value:ESObject,key:string) => {
       console.error("current convert key is" + key);
       switch (key) {
@@ -62,10 +60,7 @@ export class Convert {
         case 'compassEnabled':
           let compassEnabled = value as boolean;
           if(compassEnabled !=undefined) {
-            console.error("enter compassEnabled");
-            console.error(typeof (value));
             delegate.setCompassEnabled(value);
-            console.error("leave compassEnabled");
           }
           break;
         case 'minMaxZoomPreference':
@@ -120,17 +115,7 @@ export class Convert {
           break;
       }
     })
-
-
-
-    console.error("interpretMapLibreMapOptions enter2");
-
-
-
-
     //setCompassViewPosition(position: mapCommon.MapPoint):void
-
-
 
     // if {options["attributionButtonPosition"] ！= null} {
     //
@@ -140,13 +125,9 @@ export class Convert {
 
     //setLogoViewMargins(x:number, y:number):void
 
-
     //setMyLocationRenderMode(myLocationRenderMode:number):void
 
     //setMyLocationTrackingMode(myLocationTrackingMode:number):void
-
-
-
 
     //setZoomGesturesEnabled(zoomGesturesEnabled:boolean):void
 
@@ -174,12 +155,3 @@ export class Convert {
     return CoordinateBounds
   }
 }
-// if let compassEnabled = options["compassEnabled"] as? Bool {
-//   delegate.setCompassEnabled(compassEnabled: compassEnabled)
-// }
-// if let minMaxZoomPreference = options["minMaxZoomPreference"] as? [Double] {
-//   delegate.setMinMaxZoomPreference(
-//     min: minMaxZoomPreference[0],
-//     max: minMaxZoomPreference[1]
-//   )
-// }

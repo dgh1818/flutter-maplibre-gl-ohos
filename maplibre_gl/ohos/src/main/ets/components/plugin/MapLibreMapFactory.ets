@@ -14,10 +14,6 @@ export class MapLibreMapFactory extends PlatformViewFactory {
   }
 
   public create(context: common.Context, viewId: number, args: Object): PlatformView {
-    //return new OhosMapWidgetView(context, viewId, args, this.message);  // 导出自定义的原生视图
-    //new MapLibreMapController(context, viewId, args, this.message);
-    //custom_map.init.call(custom_map，context);
-
     return new MapLibreMapController(context, viewId, args, this.message);  // 导出自定义的原生视图
   }
 }

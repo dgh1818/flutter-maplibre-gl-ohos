@@ -54,7 +54,7 @@ abstract class MapLibrePlatform {
   Future<bool?> moveCamera(CameraUpdate cameraUpdate);
   Future<void> updateMyLocationTrackingMode(
       MyLocationTrackingMode myLocationTrackingMode);
-  Future<void> addMarkerAtLatLng_Ohos(LatLng centre, String path);
+  Future<void> addMarkerAtLatLng_Ohos(LatLng centre, String path, double size);
 
   Future<void> matchMapLanguageWithDeviceDefault();
 
