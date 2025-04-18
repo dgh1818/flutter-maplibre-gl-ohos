@@ -27,9 +27,7 @@ export default class MapLibreMapsPlugin implements FlutterPlugin {
     registerViewFactory(
       'plugins.flutter.io/maplibre_gl',
       new MapLibreMapFactory(
-        binding.getBinaryMessenger(),
-        StandardMessageCodec.INSTANCE
-        ));
+        binding.getBinaryMessenger(), StandardMessageCodec.INSTANCE));
   }
 
   onDetachedFromEngine(binding: FlutterPluginBinding): void {}
