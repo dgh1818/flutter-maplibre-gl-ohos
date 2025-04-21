@@ -20,8 +20,6 @@ import { resourceManager } from '@kit.LocalizationKit';
 @Component
 export struct MapOhosMap {
   @Prop public params: Params;
-  //@ObjectLink mapLibreMapController:MapLibreMapController;
-  //@ObjectLink mapController:map.MapComponentController;
 
   private TAG = "MapOhosMap";
   private mapOptions?: mapCommon.MapOptions;
@@ -30,7 +28,6 @@ export struct MapOhosMap {
   private mapEventManager?: map.MapEventManager;
   public mapController_link: SubscribedAbstractProperty<map.MapComponentController> = AppStorage.link('mapController');
   public mapLibreMapController_link: SubscribedAbstractProperty<MapLibreMapController> = AppStorage.link('mapLibreMapController');
-
   public mapLibreMapController:MapLibreMapController = this.params.platformView as MapLibreMapController
   methodChannel:MethodChannel = this.mapLibreMapController.methodChannel;
     aboutToAppear(): void {
@@ -44,7 +41,6 @@ export struct MapOhosMap {
         zoom: 10
       }
     };
-
     //地图初始化的回调
     this.callback = async (err, mapController) => {
       if (!err) {
@@ -68,7 +64,7 @@ export struct MapOhosMap {
   build() {
     Stack() {
       // 调用MapComponent组件初始化地图 const map_view2:MapComponent
-      MapComponent({ mapOptions: this.mapOptions, mapCallback: this.callback });
+      MapComponent({ mapOptions: this.mapOptions, mapCallback: this.callback }).width('100%').height('100%');
     }
   }
 }

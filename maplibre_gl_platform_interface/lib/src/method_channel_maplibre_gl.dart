@@ -53,6 +53,9 @@ class MapLibreMethodChannel extends MapLibrePlatform {
         final cameraPosition =
             CameraPosition.fromMap(call.arguments['position'])!;
         onCameraMovePlatform(cameraPosition);
+      case 'map#onMapReverseLocationCallback':
+        final String result_location = call.arguments['result'];
+        onMapReverseLocationCallback(result_location);
       case 'camera#onIdle':
         final cameraPosition =
             CameraPosition.fromMap(call.arguments['position']);
@@ -227,6 +230,16 @@ class MapLibreMethodChannel extends MapLibrePlatform {
       'bytes' : bytes.buffer.asUint8List(),
       'iconSize': size
     });
+  }
+
+  @override
+  Future<LatLng> GCJ02toWGS84_Ohos(LatLng centre) async {
+    final coordinate = await _channel.invokeMethod('map#GCJ02toWGS84', <String, dynamic>{
+      'longitude': centre.longitude,
+      'latitude': centre.latitude
+    });
+
+    return LatLng(coordinate['x'], coordinate['y']);
   }
 
   @override
@@ -444,6 +457,18 @@ class MapLibreMethodChannel extends MapLibrePlatform {
         'longitude': latLng.longitude,
       });
       return Point(screenPosMap['x'], screenPosMap['y']);
+    } on PlatformException catch (e) {
+      return Future.error(e);
+    }
+  }
+
+  @override
+  Future<void> reverseGeo(LatLng latLng) async {
+    try {
+        await _channel.invokeMethod('map#reverseGeo', <String, dynamic>{
+          'latitude': latLng.latitude,
+          'longitude': latLng.longitude,
+      });
     } on PlatformException catch (e) {
       return Future.error(e);
     }

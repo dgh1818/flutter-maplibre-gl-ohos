@@ -27,6 +27,8 @@ abstract class MapLibrePlatform {
 
   final onCameraMovePlatform = ArgumentCallbacks<CameraPosition>();
 
+  final onMapReverseLocationCallback = ArgumentCallbacks<String>();
+
   final onCameraIdlePlatform = ArgumentCallbacks<CameraPosition?>();
 
   final onMapStyleLoadedPlatform = ArgumentCallbacks<void>();
@@ -50,11 +52,13 @@ abstract class MapLibrePlatform {
       OnPlatformViewCreatedCallback onPlatformViewCreated,
       Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers);
   Future<CameraPosition?> updateMapOptions(Map<String, dynamic> optionsUpdate);
+  Future<void> reverseGeo(LatLng latLng);
   Future<bool?> animateCamera(CameraUpdate cameraUpdate, {Duration? duration});
   Future<bool?> moveCamera(CameraUpdate cameraUpdate);
   Future<void> updateMyLocationTrackingMode(
       MyLocationTrackingMode myLocationTrackingMode);
   Future<void> addMarkerAtLatLng_Ohos(LatLng centre, String path, double size);
+  Future<LatLng> GCJ02toWGS84_Ohos(LatLng centre);
 
   Future<void> matchMapLanguageWithDeviceDefault();
 
@@ -211,6 +215,7 @@ abstract class MapLibrePlatform {
     onFeatureDraggedPlatform.clear();
     onCameraMoveStartedPlatform.clear();
     onCameraMovePlatform.clear();
+    onMapReverseLocationCallback.clear();
     onCameraIdlePlatform.clear();
     onMapStyleLoadedPlatform.clear();
 

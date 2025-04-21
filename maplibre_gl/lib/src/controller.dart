@@ -89,6 +89,7 @@ class MapLibreMapController extends ChangeNotifier {
     this.onCameraIdle,
   }) : _maplibrePlatform = maplibrePlatform {
     _cameraPosition = initialCameraPosition;
+    _reverseLocation = '';
 
     _maplibrePlatform.onFeatureTappedPlatform.add((payload) {
       for (final fun
@@ -118,6 +119,11 @@ class MapLibreMapController extends ChangeNotifier {
 
     _maplibrePlatform.onCameraMovePlatform.add((cameraPosition) {
       _cameraPosition = cameraPosition;
+      notifyListeners();
+    });
+
+    _maplibrePlatform.onMapReverseLocationCallback.add((reverseLocation) {
+      _reverseLocation = reverseLocation;
       notifyListeners();
     });
 
@@ -246,6 +252,9 @@ class MapLibreMapController extends ChangeNotifier {
   /// Will be null, if [MapLibreMap.trackCameraPosition] is false.
   CameraPosition? get cameraPosition => _cameraPosition;
   CameraPosition? _cameraPosition;
+
+  String? get reverseLocation => _reverseLocation;
+  String? _reverseLocation;
 
   final MapLibrePlatform _maplibrePlatform; //ignore: unused_field
 
@@ -667,6 +676,11 @@ class MapLibreMapController extends ChangeNotifier {
     //no marker is displayed if asset-path is incorrect
     
     return _maplibrePlatform.addMarkerAtLatLng_Ohos(centre, path, size);
+  }
+
+  Future<LatLng> GCJ02toWGS84_Ohos(LatLng centre) async {
+
+    return _maplibrePlatform.GCJ02toWGS84_Ohos(centre);
   }
 
   /// Updates the language of the map labels to match the device's language.
@@ -1263,6 +1277,10 @@ class MapLibreMapController extends ChangeNotifier {
   /// Returns null if [latLng] is not currently visible on the map.
   Future<Point> toScreenLocation(LatLng latLng) async {
     return _maplibrePlatform.toScreenLocation(latLng);
+  }
+
+   Future<void> reverseGeo(LatLng latLng) async {
+    return _maplibrePlatform.reverseGeo(latLng);
   }
 
   Future<List<Point>> toScreenLocationBatch(Iterable<LatLng> latLngs) async {
