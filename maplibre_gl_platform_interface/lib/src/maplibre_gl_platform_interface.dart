@@ -57,7 +57,7 @@ abstract class MapLibrePlatform {
   Future<bool?> moveCamera(CameraUpdate cameraUpdate);
   Future<void> updateMyLocationTrackingMode(
       MyLocationTrackingMode myLocationTrackingMode);
-  Future<void> addMarkerAtLatLng_Ohos(LatLng centre, String path, double size);
+  Future<void> addMarkerAtLatLng_Ohos(LatLng centre, ByteData bytes, double size);
   Future<LatLng> GCJ02toWGS84_Ohos(LatLng centre);
 
   Future<void> matchMapLanguageWithDeviceDefault();

@@ -672,10 +672,10 @@ class MapLibreMapController extends ChangeNotifier {
         .updateMyLocationTrackingMode(myLocationTrackingMode);
   }
 
-  Future<void> addMarkerAtLatLng_Ohos(LatLng centre, String path, double size) async {
+  Future<void> addMarkerAtLatLng_Ohos(LatLng centre, ByteData bytes, double size) async {
     //no marker is displayed if asset-path is incorrect
     
-    return _maplibrePlatform.addMarkerAtLatLng_Ohos(centre, path, size);
+    return _maplibrePlatform.addMarkerAtLatLng_Ohos(centre, bytes, size);
   }
 
   Future<LatLng> GCJ02toWGS84_Ohos(LatLng centre) async {

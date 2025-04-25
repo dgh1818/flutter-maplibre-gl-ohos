@@ -221,12 +221,10 @@ class MapLibreMethodChannel extends MapLibrePlatform {
   }
 
   @override
-  Future<void> addMarkerAtLatLng_Ohos(LatLng centre, String path, double size) async {
-    final ByteData bytes = await rootBundle.load(path);
+  Future<void> addMarkerAtLatLng_Ohos(LatLng centre, ByteData bytes, double size) async {
     await _channel.invokeMethod('map#addMarkerAtLatLng', <String, dynamic>{
       'longitude': centre.longitude,
       'latitude': centre.latitude,
-      'path' : path,
       'bytes' : bytes.buffer.asUint8List(),
       'iconSize': size
     });
