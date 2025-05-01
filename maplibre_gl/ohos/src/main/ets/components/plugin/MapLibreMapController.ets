@@ -20,7 +20,6 @@ import { resourceManager } from '@kit.LocalizationKit';
 import { ArrayList } from '@kit.ArkTS';
 import { display } from '@kit.ArkUI';
 import { fileIo as fs } from '@kit.CoreFileKit';
-
 class Feature {
   fatureString:string;
   featureObj:ESObject;
@@ -218,6 +217,7 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
     let location_output = '';
 
     this.reverse_location = location_result;
+    console.error("reverse_location" + this.reverse_location);
     if(info.city?.cityName!=undefined) {
       location_output += info.city?.cityName + ' ';
     }
@@ -296,6 +296,7 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
 
           this.cameraUpdate = map.newCameraPosition(cameraPosition);
           this.mapController?.moveCamera(this.cameraUpdate);
+
         }
 
         if (this.args_input.get("dragEnabled") != undefined) {
@@ -400,6 +401,7 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
         let mark_longitude: number = call_args.get('longitude') as number;
         let mark_latitude: number = call_args.get('latitude') as number;
         let factor: number = call_args.get('iconSize') as number;
+        //let file = call_args.get('path') as string;
         let bytes = call_args.get('bytes') as Uint8Array;
         let image_data: image.ImageSource = image.createImageSource(bytes.buffer);
         let imageInfo = image_data.getImageInfoSync(0);
@@ -460,6 +462,8 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
       case "map#toScreenLocation":
         let longitude: number = call_args.get('longitude') as number;
         let latitude: number = call_args.get('latitude') as number;
+        // console.error("longitude=" + longitude);
+        // console.error("latitude=" + latitude);
         let currentLatLng: mapCommon.LatLng = {
           latitude: latitude,
           longitude: longitude
@@ -503,6 +507,7 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
 
         let cameraUpdate = Convert.parseCameraUpdate(targetInput,this,displayClass.densityDPI);
         this.mapController?.animateCamera(cameraUpdate);
+        break;
       case "style#addImage":
       //   //let argument:ESObject = call.args as ESObject;
       //   let imageSourceId = call.args["imageSourceId"] as String
@@ -510,6 +515,7 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
         let styleName = call_args.get("name") as string
         let styleImageData: image.ImageSource = image.createImageSource(styleBytes.buffer);
         this.styleImage!.set(styleName,styleImageData);
+        break;
       //   //bytes.buffer
       //   let image_data: image.ImageSource = image.createImageSource(bytes.buffer);
       //   let width:number
