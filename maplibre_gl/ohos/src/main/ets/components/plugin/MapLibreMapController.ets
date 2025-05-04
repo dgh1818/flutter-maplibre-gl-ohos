@@ -159,6 +159,7 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
 
   public setZoomGesturesEnabled(zoomGesturesEnabled: boolean): void {
     this.mapController?.setZoomGesturesEnabled(zoomGesturesEnabled);
+    this.mapController?.setZoomControlsEnabled(zoomGesturesEnabled);
   }
 
   public setMyLocationEnabled(myLocationEnabled: boolean): void {
