@@ -17,9 +17,11 @@ import { MapLibreMapOptionsSink } from './MapLibreMapOptionsSink'
 import { image } from '@kit.ImageKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { resourceManager } from '@kit.LocalizationKit';
-import { ArrayList } from '@kit.ArkTS';
+import { ArrayList, HashMap } from '@kit.ArkTS';
 import { display } from '@kit.ArkUI';
 import { fileIo as fs } from '@kit.CoreFileKit';
+//import {SourcePropertyConverter} from './SourcePropertyConverter'
+
 class Feature {
   fatureString:string;
   featureObj:ESObject;
@@ -29,6 +31,25 @@ class Feature {
     this.featureObj = featureObj;
   }
 }
+
+// class Layer {
+//   layerId?:number;
+//   public collection?:ArrayList<map.BaseOverlay>;
+
+//   constructor(layerId?:number, addedFeature?:ArrayList<map.BaseOverlay>) {
+//     this.layerId = layerId;
+//     this.collection = addedFeature;
+//   }
+
+//   Layer(layerId?:number,) {
+//     this.layerId = layerId;
+//   }
+
+//   public addFeature(fetureString:string,featureObj:map.BaseOverlay) :number{
+//     this.collection?.add(featureObj);
+//     return this.collection!.length;
+//   }
+// }
 
 @Observed      //相当于widgetView
 export class MapLibreMapController extends PlatformView implements MethodCallHandler {
@@ -66,6 +87,11 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
   public reverse_location?:String
   addedFeature?:ArrayList<Feature>
   styleImage?:Map<string,image.ImageSource>
+  // addedFeature?:ArrayList<map.BaseOverlay>
+  // styleImage?:Map<string,image.ImageSource>
+  // stylelayer?:Map<string,ArrayList<map.BaseOverlay>>;
+  // sourceCommon?:Map<string,ESObject>;
+
 
   constructor(context: common.Context, viewId: number, args: ESObject, message: BinaryMessenger) {
     super();
@@ -81,7 +107,6 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
     console.error("set methodchannel success");
 
     this.args_input = args as Map<string, ESObject>;
-    this.args_options = this.args_input.get("options");
 
     // if dragEnabled {
     //   let pan = UIPanGestureRecognizer(
@@ -224,7 +249,7 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
     }
     if(info.adminLevel3!=undefined) {
       if(info.adminLevel3!=info.city?.cityName)
-      location_output += info.adminLevel3 + ' ';
+        location_output += info.adminLevel3 + ' ';
     }
     if(info.adminLevel4!=undefined) {
       if(info.adminLevel4!=info.adminLevel3 && info.adminLevel4!=info.city?.cityName)
@@ -265,22 +290,19 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
     if (this.args_input.get('options') == undefined) {
       console.error("this.args_input is undefined");
     } else {
+      this.args_options = this.args_input.get("options");
       Convert.interpretMapLibreMapOptions(this.args_options, this)
       console.info("interpretMapLibreMapOptions ok");
 
       if (this.args_input.get("initialCameraPosition") != undefined) {
         let initialCameraPosition: Map<string, ESObject> =
           this.args_input.get("initialCameraPosition") as Map<string, ESObject>;
-        let target = initialCameraPosition.get("target") as number[];
-        let zoom = initialCameraPosition.get("zoom") as number;
-        let tilt = initialCameraPosition.get("tilt") as number; //倾斜角
-        let bearing = initialCameraPosition.get("bearing") as number;
-        if (bearing == undefined) {
-          console.error("bearing == undefined")
-          bearing = 0;
-        }
+        if(initialCameraPosition.has("target") && initialCameraPosition.has("zoom")&&initialCameraPosition.has("tilt")&&initialCameraPosition.has("bearing")) {
+          let target = initialCameraPosition.get("target") as number[];
+          let zoom = initialCameraPosition.get("zoom") as number;
+          let tilt = initialCameraPosition.get("tilt") as number; //倾斜角
+          let bearing = initialCameraPosition.get("bearing") as number;
 
-        if (target != undefined && zoom != undefined && tilt != undefined) {
           let latitude = target[0]
           let longitude = target[1]
           console.error('latitude='+latitude+' longitude='+longitude);
@@ -300,7 +322,7 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
 
         }
 
-        if (this.args_input.get("dragEnabled") != undefined) {
+        if (this.args_input.has("dragEnabled")) {
           let enabled = this.args_input.get("dragEnabled") as boolean;
           this.dragEnabled = enabled;
         }
@@ -311,6 +333,73 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
       });
     }
     console.info("Map Init Finished");
+    if(this.mapReadyResult!=undefined) {
+      this.mapReadyResult.success(null);
+      this.mapReadyResult = undefined;
+    }
+
+    this.mapEventManager = this.mapController?.getEventManager();
+
+    this.mapController.on("cameraMove",() => {
+      //console.error("detect camera move")
+      if (!this.trackCameraPosition) {
+        console.error("trackCameraPosition is false")
+        return;
+      }
+      //console.error("is trackCameraPosition")
+      // this.mapController = this.mapController_link!.get();
+      if(this.mapController==undefined) {
+        console.error("this.mapController is undefined")
+        return;
+      }
+      let CameraPosition = this.mapController.getCameraPosition();
+
+      this.methodChannel.invokeMethod("camera#onMove", {
+        "position": {
+          "bearing": CameraPosition.bearing,
+          "target": [
+            CameraPosition.target.latitude,
+            CameraPosition.target.longitude
+          ],
+          "tilt": CameraPosition.tilt,
+          "zoom": CameraPosition.zoom
+        }
+      });
+    });
+
+    this.mapController.on("cameraIdle",() => {
+      console.error("enter onCameraIdle")
+
+      let args3:Map<string, ESObject> = new Map<string, ESObject>();
+
+      if(this.mapController==undefined) {
+        console.error("this.mapController is undefined")
+        return;
+      }
+      let CameraPosition: mapCommon.CameraPosition = this.mapController.getCameraPosition();
+
+      //this.methodChannel.invokeMethod("camera#onIdle", args3);
+      this.methodChannel.invokeMethod("camera#onIdle", {
+        "position": {
+          "bearing": CameraPosition.bearing,
+          "target": [
+            CameraPosition.target.latitude,
+            CameraPosition.target.longitude
+          ],
+          "tilt": CameraPosition.tilt,
+          "zoom": CameraPosition.zoom
+        }
+      });
+    });
+
+    this.mapController.on("cameraMoveStart",(reason:number) => {
+      let isGesture:boolean = (reason == 1);
+
+      this.methodChannel.invokeMethod("camera#onMoveStarted", {
+        isGesture:isGesture,
+      });
+    });
+
   }
 
   public handleMapTap(position: mapCommon.LatLng) {
@@ -325,6 +414,44 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
       "lat": position.latitude,
     });
   }
+
+  // public addSource(sourceId: string, properties: Map<String,ESObject>) {
+  //   let sourceType = properties.get("type") as String
+  //   if(sourceType!=undefined) {
+
+  //     //var source: MLNSource?
+
+  //       switch (sourceType) {
+  //     // case "vector":
+  //     // source = SourcePropertyConverter.buildVectorTileSource(
+  //     //   identifier: sourceId,
+  //     // properties: properties
+  //     // )
+  //     // case "raster":
+  //     // source = SourcePropertyConverter.buildRasterTileSource(
+  //     //   identifier: sourceId,
+  //     // properties: properties
+  //     // )
+  //     // case "raster-dem":
+  //     // source = SourcePropertyConverter.buildRasterDemSource(
+  //     //   identifier: sourceId,
+  //     // properties: properties
+  //     // )
+  //     // case "image":
+  //     // source = SourcePropertyConverter.buildImageSource(
+  //     //   identifier: sourceId,
+  //     // properties: properties
+  //     // )
+  //     case "geojson":
+  //       this.sourceCommon?.set(sourceId,properties)
+
+  //     default:
+  //     // unsupported source type
+
+  //   }
+
+  // }
+  //}
 
   //   let result = firstFeatureOnLayers(at: point)
   //   // if let feature = result.feature {
@@ -346,30 +473,30 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
   //   // }
   // }
 
-//   firstFeatureOnLayers(at:mapCommon.MapPoint):[string,string] {
-//     this.mapController.
-//   guard let style = mapView.style else { return (nil, nil) }
-//
-// // get layers in order (interactiveFeatureLayerIds is unordered)
-// let clickableLayers = style.layers.filter { layer in
-// interactiveFeatureLayerIds.contains(layer.identifier)
-// }
-//
-// for layer in clickableLayers.reversed() {
-//   let features = mapView.visibleFeatures(
-//     at: at,
-//   styleLayerIdentifiers: [layer.identifier]
-//   )
-//   if let feature = features.first {
-//     return (feature, layer.identifier)
-//   }
-// }
-// return (nil, nil)
-// }
+  //   firstFeatureOnLayers(at:mapCommon.MapPoint):[string,string] {
+  //     this.mapController.
+  //   guard let style = mapView.style else { return (nil, nil) }
+  //
+  // // get layers in order (interactiveFeatureLayerIds is unordered)
+  // let clickableLayers = style.layers.filter { layer in
+  // interactiveFeatureLayerIds.contains(layer.identifier)
+  // }
+  //
+  // for layer in clickableLayers.reversed() {
+  //   let features = mapView.visibleFeatures(
+  //     at: at,
+  //   styleLayerIdentifiers: [layer.identifier]
+  //   )
+  //   if let feature = features.first {
+  //     return (feature, layer.identifier)
+  //   }
+  // }
+  // return (nil, nil)
+  // }
 
 
 
-  onMethodCall(call: MethodCall, result: MethodResult): void {
+  async onMethodCall(call: MethodCall, result: MethodResult): Promise<void> {
     // 接受Dart侧发来的消息
     let method: string = call.method;
     let call_args: Map<string, ESObject> = call.args as Map<string, ESObject>;
@@ -393,7 +520,6 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
         }
         //result.success(true);
         console.error("this.mapController underfined");
-        result.success(true);
         this.mapReadyResult = result;
         break;
       case 'map#addMarkerAtLatLng':
@@ -445,6 +571,10 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
 
         console.error("enter controller marker");
         this.mapController?.addMarker(markerOptions);
+        // .then((result: map.Marker) => {
+        //   this.addedFeature?.add(result);
+        // })
+        //let result:map.Marker|undefined = this.mapController?.addMarker(markerOptions);
         console.error("leave controller marker");
         result.success(true);
         break;
@@ -453,8 +583,8 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
         //var reply = [String: NSObject]()
         this.projection = this.mapController!.getProjection();
         let visibleRegion: mapCommon.VisibleRegion = this.projection.getVisibleRegion();
-        let reply_sw: ESObject = [visibleRegion.nearLeft.latitude, visibleRegion.nearLeft.longitude] as ESObject
-        let reply_ne: ESObject = [visibleRegion.farRight.latitude, visibleRegion.farRight.longitude] as ESObject
+        let reply_sw = [visibleRegion.nearLeft.latitude, visibleRegion.nearLeft.longitude]
+        let reply_ne = [visibleRegion.farRight.latitude, visibleRegion.farRight.longitude]
         result.success({
           "sw": reply_sw,
           "ne": reply_ne
@@ -473,23 +603,20 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
         if (this.mapController==undefined) {
           console.error("this.mapController = undefined");
         }
+
         this.projection = this.mapController?.getProjection()!;
-
-
-        console.error("leave projection");
-        let currentPoint: mapCommon.MapPoint = this.projection.toScreenLocation(currentLatLng);
-        console.error("leave fromScreenLocation");
+        let currentPoint: mapCommon.MapPoint = this.mapController_link!.get().getProjection().toScreenLocation(currentLatLng);
 
         result.success({
-          "x": currentPoint.positionX as ESObject,
-          "y": currentPoint.positionY as ESObject
+          "x":currentPoint.positionX,
+          "y": currentPoint.positionY
         });
         break;
       case "map#reverseGeo":
         let reverseLongitude: number = call_args.get('longitude') as number;
         let reverselatitude: number = call_args.get('latitude') as number;
         let reverseInput: site.ReverseGeocodeParams = {
-            // 位置经纬度
+          // 位置经纬度
           location: {
             latitude: reverselatitude,
             longitude: reverseLongitude
@@ -506,17 +633,105 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
         let displayClass: display.Display | null = null;
         displayClass=display.getDefaultDisplaySync();
 
-        let cameraUpdate = Convert.parseCameraUpdate(targetInput,this,displayClass.densityDPI);
+        let cameraUpdate:map.CameraUpdate|undefined = Convert.parseCameraUpdate(targetInput,this,displayClass.densityDPI);
+        if(cameraUpdate==undefined) {
+          console.error("cameraUpdate is undefined")
+          return result.success(false);
+        }
+
         this.mapController?.animateCamera(cameraUpdate);
+        return result.success({});
         break;
-      case "style#addImage":
-      //   //let argument:ESObject = call.args as ESObject;
-      //   let imageSourceId = call.args["imageSourceId"] as String
-        let styleBytes = call_args.get("bytes") as Uint8Array
-        let styleName = call_args.get("name") as string
-        let styleImageData: image.ImageSource = image.createImageSource(styleBytes.buffer);
-        this.styleImage!.set(styleName,styleImageData);
+      case "map#toLatLng" : {
+        let position_input_x = call_args.get('x') as number;
+        let position_input_y = call_args.get('y') as number;
+        let point: mapCommon.MapPoint = {
+          positionX: position_input_x,
+          positionY: position_input_y
+        };
+
+        let LatLng = this.mapController?.getProjection().fromScreenLocation(point);
+        return result.success({
+          "latitude": LatLng!.latitude,
+          "longitude": LatLng!.longitude,
+        });
         break;
+      }
+
+
+      // case "style#addImage":
+      //   //   //let argument:ESObject = call.args as ESObject;
+      //   //   let imageSourceId = call.args["imageSourceId"] as String
+      //   let styleBytes = call_args.get("bytes") as Uint8Array
+      //   let styleName = call_args.get("name") as string
+      //   let styleImageData: image.ImageSource = image.createImageSource(styleBytes.buffer);
+      //   this.styleImage!.set(styleName,styleImageData);
+      //   return result.success({});
+      //   break;
+      // case "style#getLayerIds":
+      //   let layerIds:ArrayList<string>;
+      //   this.stylelayer!.forEach((value:ArrayList<map.BaseOverlay>,key:string) => {
+      //     layerIds.add(key);
+      //     console.error("list" + key);
+      //   })
+      //
+      //   result.success({"layers": layerIds!});
+      //   break;
+      // case "style#getSourceIds":
+      //   let sourceIds:ArrayList<string>;
+      //   this.styleImage!.forEach((value:image.ImageSource,key:string) => {
+      //     sourceIds.add(key);
+      //     console.error("Imagelist:" + key);
+      //   })
+
+      //   result.success({"sources": sourceIds!});
+      //   break;
+      // case "style#removeLayer":
+
+      //   let removelayerId = call_args.get("layerId") as string
+      //   if(removelayerId==undefined) {
+      //     result.notImplemented();
+      //   }
+      //   if(!this.stylelayer?.has(removelayerId)) {
+      //     result.notImplemented();
+      //     return;
+      //   }
+      //   this.stylelayer.get(removelayerId)!.forEach((value:map.BaseOverlay,index:number) => {
+      //     value.remove();
+      //     console.error("removed layer:" + removelayerId + ':' + index);
+      //   })
+
+      //   //let layer:ArrayList<map.BaseOverlay> = this.stylelayer?.get(removelayerId)!
+      //   this.stylelayer.delete(removelayerId);
+      //   return result.success({});
+      // case "style#removeSource":
+
+      //   let removeSourceId = call_args.get("sourceId") as string
+      //   if(removeSourceId==undefined) {
+      //     result.notImplemented();
+      //   }
+      //   if(!this.styleImage?.has(removeSourceId)) {
+      //     result.notImplemented();
+      //     return;
+      //   }
+      //   //let layer:ArrayList<map.BaseOverlay> = this.stylelayer?.get(removelayerId)!
+      //   this.styleImage.delete(removeSourceId);
+      //   return result.success({});
+      // case "style#addSource":
+      //   let id:string = call_args.get("sourceId") as string;
+      //   let properties:Map<string, ESObject> = call_args.get("properties") as Map<string, ESObject>;
+      //   SourcePropertyConverter.addSource(id, properties, this);
+      //   result.success(null);
+      //   //this.mapController.add
+      //   break;
+
+      // result(nil)
+      // return
+      //
+      // interactiveFeatureLayerIds.remove(layerId)
+      // mapView.style?.removeLayer(layer)
+      // result(nil)
+
       //   //bytes.buffer
       //   let image_data: image.ImageSource = image.createImageSource(bytes.buffer);
       //   let width:number
@@ -561,6 +776,8 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
 
       // result.success(null);
       // break;
+      default:
+        result.notImplemented();
     }
 
     // let imageOverlayParams: mapCommon.ImageOverlayParams = {

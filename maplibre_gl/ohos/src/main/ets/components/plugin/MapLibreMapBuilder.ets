@@ -30,7 +30,7 @@ export struct MapOhosMap {
   public mapLibreMapController_link: SubscribedAbstractProperty<MapLibreMapController> = AppStorage.link('mapLibreMapController');
   public mapLibreMapController:MapLibreMapController = this.params.platformView as MapLibreMapController
   methodChannel:MethodChannel = this.mapLibreMapController.methodChannel;
-    aboutToAppear(): void {
+  aboutToAppear(): void {
     //地图初始化参数，设置地图中心点坐标及层级
     this.mapOptions = {
       position: {
@@ -49,9 +49,8 @@ export struct MapOhosMap {
         //this.mapLibreMapController_link.get().mapController = mapController;
         this.mapController_link.set(mapController);
         this.mapLibreMapController_link.get().init();
-        this.mapLibreMapController_link.get().mapEventManager = this.mapController!.getEventManager();
         this.mapEventManager = this.mapController.getEventManager();
-        this.mapController?.moveCamera(this.mapLibreMapController.cameraUpdate);
+        //this.mapController?.moveCamera(this.mapLibreMapController.cameraUpdate);
         let callback = () => {
           console.info(this.TAG, `on-mapLoad`);
           this.methodChannel.invokeMethod("map#onStyleLoaded", "");

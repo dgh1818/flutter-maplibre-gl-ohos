@@ -185,6 +185,7 @@ class MapLibreMethodChannel extends MapLibrePlatform {
       // 封装原生组件
         viewType: 'plugins.flutter.io/maplibre_gl', // 这里要与Native侧CustomPlugin中的保持一致
         onPlatformViewCreated: onPlatformViewCreated,
+        gestureRecognizers: gestureRecognizers,
         creationParams: creationParams,
         creationParamsCodec: const StandardMessageCodec(),
       );
