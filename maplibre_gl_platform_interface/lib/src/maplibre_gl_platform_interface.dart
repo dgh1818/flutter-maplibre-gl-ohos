@@ -58,6 +58,7 @@ abstract class MapLibrePlatform {
   Future<void> updateMyLocationTrackingMode(
       MyLocationTrackingMode myLocationTrackingMode);
   Future<void> addMarkerAtLatLng_Ohos(LatLng centre, ByteData bytes, double size);
+  Future<void> addHeatmapData_Ohos(List<LatLng> pointData);
   Future<LatLng> GCJ02toWGS84_Ohos(LatLng centre);
 
   Future<void> matchMapLanguageWithDeviceDefault();

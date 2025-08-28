@@ -222,6 +222,18 @@ class MapLibreMethodChannel extends MapLibrePlatform {
   }
 
   @override
+  Future<void> addHeatmapData_Ohos(List<LatLng> pointData) async {
+    List<double> lngList = pointData.map((point) => point.longitude).toList();
+
+  // 提取所有纬度
+    List<double> latList = pointData.map((point) => point.latitude).toList();
+    return _channel.invokeMethod('map#addHeatmapData', <String, List<double>>{
+      'longitude': lngList,
+      'latitude': latList,
+    });
+  }
+
+  @override
   Future<void> addMarkerAtLatLng_Ohos(LatLng centre, ByteData bytes, double size) async {
     await _channel.invokeMethod('map#addMarkerAtLatLng', <String, dynamic>{
       'longitude': centre.longitude,

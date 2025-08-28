@@ -678,6 +678,12 @@ class MapLibreMapController extends ChangeNotifier {
     return _maplibrePlatform.addMarkerAtLatLng_Ohos(centre, bytes, size);
   }
 
+  Future<void> addHeatmapData_Ohos(List<LatLng> pointData) async {
+    //no marker is displayed if asset-path is incorrect
+    
+    return _maplibrePlatform.addHeatmapData_Ohos(pointData);
+  }
+
   Future<LatLng> GCJ02toWGS84_Ohos(LatLng centre) async {
 
     return _maplibrePlatform.GCJ02toWGS84_Ohos(centre);

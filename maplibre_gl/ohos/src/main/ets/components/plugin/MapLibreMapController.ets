@@ -87,6 +87,7 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
   public reverse_location?:String
   addedFeature?:ArrayList<Feature>
   styleImage?:Map<string,image.ImageSource>
+  public heatmap?:map.Heatmap;
   // addedFeature?:ArrayList<map.BaseOverlay>
   // styleImage?:Map<string,image.ImageSource>
   // stylelayer?:Map<string,ArrayList<map.BaseOverlay>>;
@@ -522,6 +523,52 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
         console.error("this.mapController underfined");
         this.mapReadyResult = result;
         break;
+      case 'map#addHeatmapData': {
+        let longitude: number[] = call_args.get('longitude') as number[];
+        let latitude: number[] = call_args.get('latitude') as number[];
+
+        let data: mapCommon.WeightedLatLng[] = [];
+        for (let i = 0; i < longitude.length; i++) {
+          data.push({
+            point: {
+              longitude: longitude[i],
+              latitude: latitude[i],
+            },
+            intensity: 1
+          });
+        }
+        let heatMapOptions: mapCommon.HeatmapParams = {
+          id: 'heatmap1',
+          color:{
+            0.0:  0x00673AB7,   // rgba(103,58,183,0.0)
+            0.3:  0xFF673AB7,   // rgb(103,58,183) -> alpha=1.0
+            0.5:  0xFF2195F3,   // rgb(33,149,243)
+            0.7:  0xFF4CAF4F,   // rgb(76,175,79)
+            0.95: 0xFFFFEB3B,   // rgb(255,235,59)
+            1.0:  0xFFFF5622    // rgb(255,86,34)
+          },
+          data:data,
+          radius:{
+            0: 4,
+            4: 8,
+            9: 16,
+          },
+          intensity: {
+            0: 0.5,
+            9: 2,
+          },
+          opacity:0.7,
+        }
+
+        if(this.heatmap==undefined) {
+          this.heatmap = await this.mapController!.addHeatmap(heatMapOptions);
+        } else {
+          this.heatmap.setData(data);
+        }
+
+        return result.success({});
+      }
+        break;
       case 'map#addMarkerAtLatLng':
         console.error("enter map#addMarkerAtLatLng")
 
@@ -590,7 +637,7 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
           "ne": reply_ne
         });
         break;
-      case "map#toScreenLocation":
+      case "map#toScreenLocation": {
         let longitude: number = call_args.get('longitude') as number;
         let latitude: number = call_args.get('latitude') as number;
         // console.error("longitude=" + longitude);
@@ -600,17 +647,19 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
           longitude: longitude
         };
         console.error("enter projection");
-        if (this.mapController==undefined) {
+        if (this.mapController == undefined) {
           console.error("this.mapController = undefined");
         }
 
         this.projection = this.mapController?.getProjection()!;
-        let currentPoint: mapCommon.MapPoint = this.mapController_link!.get().getProjection().toScreenLocation(currentLatLng);
+        let currentPoint: mapCommon.MapPoint =
+          this.mapController_link!.get().getProjection().toScreenLocation(currentLatLng);
 
         result.success({
-          "x":currentPoint.positionX,
+          "x": currentPoint.positionX,
           "y": currentPoint.positionY
         });
+      }
         break;
       case "map#reverseGeo":
         let reverseLongitude: number = call_args.get('longitude') as number;
