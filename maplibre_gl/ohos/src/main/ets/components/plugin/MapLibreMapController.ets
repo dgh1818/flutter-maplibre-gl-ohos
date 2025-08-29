@@ -529,35 +529,42 @@ export class MapLibreMapController extends PlatformView implements MethodCallHan
 
         let data: mapCommon.WeightedLatLng[] = [];
         for (let i = 0; i < longitude.length; i++) {
-          data.push({
-            point: {
-              longitude: longitude[i],
-              latitude: latitude[i],
-            },
-            intensity: 1
-          });
+          let point:mapCommon.LatLng = {
+            latitude : latitude[i],
+            longitude : longitude[i],
+          }
+
+          let WeightedLatLng:mapCommon.WeightedLatLng = {
+            point:point,
+          }
+
+          data.push(WeightedLatLng);
         }
+
         let heatMapOptions: mapCommon.HeatmapParams = {
-          id: 'heatmap1',
+          id: 'heatmap001',
           color:{
             0.0:  0x00673AB7,   // rgba(103,58,183,0.0)
-            0.3:  0xFF673AB7,   // rgb(103,58,183) -> alpha=1.0
-            0.5:  0xFF2195F3,   // rgb(33,149,243)
-            0.7:  0xFF4CAF4F,   // rgb(76,175,79)
+            0.3:  0xFF673AB7,   // rgb(103,58,183)
+            0.5:  0xFF2196F3,   // rgb(33,149,243)
+            0.7:  0xFF4CAF50,   // rgb(76,175,79)
             0.95: 0xFFFFEB3B,   // rgb(255,235,59)
             1.0:  0xFFFF5622    // rgb(255,86,34)
           },
           data:data,
+          //radius:20,
           radius:{
             0: 4,
             4: 8,
             9: 16,
           },
+          //intensity: 1,
           intensity: {
             0: 0.5,
             9: 2,
           },
-          opacity:0.7,
+          //intensity: 1,
+          opacity:0.3, //opposite to MapLibreMap
         }
 
         if(this.heatmap==undefined) {

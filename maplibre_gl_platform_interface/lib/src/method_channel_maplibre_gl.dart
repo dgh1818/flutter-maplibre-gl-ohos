@@ -227,7 +227,7 @@ class MapLibreMethodChannel extends MapLibrePlatform {
 
   // 提取所有纬度
     List<double> latList = pointData.map((point) => point.latitude).toList();
-    return _channel.invokeMethod('map#addHeatmapData', <String, List<double>>{
+    return _channel.invokeMethod('map#addHeatmapData', <String, List<dynamic>>{
       'longitude': lngList,
       'latitude': latList,
     });

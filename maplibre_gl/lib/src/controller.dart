@@ -1285,7 +1285,7 @@ class MapLibreMapController extends ChangeNotifier {
     return _maplibrePlatform.toScreenLocation(latLng);
   }
 
-   Future<void> reverseGeo(LatLng latLng) async {
+  Future<void> reverseGeo(LatLng latLng) async {
     return _maplibrePlatform.reverseGeo(latLng);
   }
 
